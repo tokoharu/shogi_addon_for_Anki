@@ -1,8 +1,6 @@
 # -*- mode: Python ; coding: utf-8 -*-
 #
 # Copyright © 2018 tokoharu
-# Parts taken from from anki/latex.py
-# Copyright: Damien Elmes <anki@ichi2.net>
 #
 # The style is from the AnkiDroid code, presumably
 # Copyright (c) 2012 Kostas Spyropoulos <inigo.aldana@gmail.com>
