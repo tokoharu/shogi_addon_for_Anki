@@ -8,14 +8,16 @@
 # License: GNU AGPL, version 3 or later;
 # http://www.gnu.org/copyleft/agpl.html
 
-from anki import hooks
 """
 Add-on for Anki 2.1 to show a shogi board.
 """
 import re
+import sys
 from collections import namedtuple
 
+from anki import hooks
 from anki.cards import Card
+from aqt.utils import showInfo
 
 BOARD_SIZE = 150
 __version__ = '1.0.0'
@@ -23,7 +25,6 @@ __version__ = '1.0.0'
 FenData = namedtuple(
     'FenData',
     ['placement', 'active', 'mochi', 'count'])
-fen_re = re.compile(r"\[sfen\](.+?)\[/sfen\]", re.DOTALL | re.IGNORECASE)
 
 piece = dict(zip("kgsnlbrp", u"玉金銀桂香角飛歩"))
 promote = dict(zip(u"銀桂香角飛歩", u"全圭杏馬龍と"))
@@ -224,9 +225,9 @@ def insert_table(fen_match):
 
 
 def kanji_num(c):
-    hoge = dict(zip(u"一二三四五六七八九十", range(1, 11)))
+    patterns = dict(zip(u"一二三四五六七八九十", range(1, 11)))
     try:
-        return hoge[c]
+        return patterns[c]
     except:
         return 0
 
@@ -234,8 +235,11 @@ def kanji_num(c):
 def insert_kif_table(txt):
     origin = txt.group(1)
     line_re = re.compile(r"<div>[^<]*</div>")
-    stripdiv_re = re.compile(r"<div>(.*?)</div>")
+    stripdiv_re = re.compile(r"<div>(.*)</div>")
     origin = "<div>" + origin + "</div>"
+    if origin.count("div") < origin.count("br"):
+        line_re = re.compile(r"<br>[^<]*")
+        stripdiv_re = re.compile(r"<br>(.*)")
 
     line_data = line_re.findall(origin)
     boardflag = 0
@@ -255,6 +259,8 @@ def insert_kif_table(txt):
         posb = line.find(u"end")
         mochi_data = line[(posa+1):(posb)].split(u"　")
         for pdata in mochi_data:
+            if len(pdata) == 0:
+                continue
             val = 0
             for c in pdata:
                 val += kanji_num(c)
@@ -320,13 +326,37 @@ def insert_kif_table(txt):
         rows=rows, act="", count="", other=comment)
 
 
+def show_error_message(output):
+    comment = "<h2>error occured when rendering (shogi_visualizer addon by tokoharu).</h2>"
+    comment += "<pre>please submit message to issue at github (https://github.com/tokoharu/shogi_addon_for_Anki/issues)</pre>"
+
+    message1 = comment
+
+    comment += "<pre>message : </pre>"
+    comment += output.question_text.replace("<", "_").replace(">", "_")
+    comment += output.answer_text.replace("<", "_").replace(">", "_")
+
+    sys.stderr.write(comment)
+    showInfo(message1)
+
+
 def make_kif_table(output, context):
     kif_re = re.compile(r"\[kif\](.+?)\[/kif\]", re.DOTALL | re.IGNORECASE)
-    output.question_text = kif_re.sub(insert_kif_table, output.question_text)
+    try:
+        output.question_text = kif_re.sub(
+            insert_kif_table, output.question_text)
+        output.answer_text = kif_re.sub(insert_kif_table, output.answer_text)
+    except:
+        show_error_message(output)
 
 
 def make_fen_table(output, context):
-    output.question_text = fen_re.sub(insert_table, output.question_text)
+    fen_re = re.compile(r"\[sfen\](.+?)\[/sfen\]", re.DOTALL | re.IGNORECASE)
+    try:
+        output.question_text = fen_re.sub(insert_table, output.question_text)
+        output.answer_text = fen_re.sub(insert_table, output.answer_text)
+    except:
+        show_error_message(output)
 
 
 old_css = Card.css
