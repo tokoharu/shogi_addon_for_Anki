@@ -1,5 +1,15 @@
-# Anki向け将棋ビジュアライザ
+# Shogi Visualizer for Anki
 
+This is an addon for Anki (mainly 2.1.x).
+
+You can use following command to view board when you open question card.
+
+[sfen] (sfen format) [/sfen]
+[kif]  (kif format) [/kif] (note: this is not complete yet.)
+
+
+
+(日本語)
 フリーソフトAnkiを用いて将棋の実力向上を手助けするアドオンです。
 とくに、自身の対局で現れた次の一手問題を数日後の自身に出題するために有用です。
 
