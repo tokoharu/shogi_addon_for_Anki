@@ -4,8 +4,9 @@ This is an addon for Anki (mainly 2.1.x).
 
 You can use following command to view board when you open question card.
 
-[sfen] (sfen format) [/sfen]
-[kif]  (kif format) [/kif] (note: this is not complete yet.)
+`[sfen] (sfen format) [/sfen]`
+
+`[kif]  (kif format) [/kif]` 
 
 
 
